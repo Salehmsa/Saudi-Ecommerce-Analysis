@@ -1,0 +1,28 @@
+Dimension,KPI,Value
+Revenue,Total Revenue (3 yrs),"12,793,767 SAR"
+Revenue,Total Profit,"4,271,625 SAR"
+Revenue,Profit Margin,33.39%
+Revenue,YoY Growth 2022→2023,+20.04%
+Revenue,YoY Growth 2023→2024,+30.59%
+Revenue,Average Order Value (AOV),"1,599.22 SAR"
+Customer,Total Unique Customers,"1,976"
+Customer,Repeat Customer Rate,92.05%
+Customer,Average CLV,"6,474.58 SAR"
+Customer,Median CLV,"5,168.27 SAR"
+Customer,Revenue per Customer,"6,474.58 SAR"
+Channel,Top Channel,Online
+Channel,Top Channel Share,46.2%
+Channel,Highest AOV Channel,Online
+Geography,#1 City by Revenue,Riyadh
+Geography,#1 City Share,35.1%
+Geography,Fastest Growing City,Medina (+94%)
+Product,#1 Category,Sports
+Product,#1 Category Share,31.2%
+Product,Highest Margin Category,Fashion (35.7%)
+Product,#1 Product,Dumbbells
+Time,Best Month (avg),January
+Time,Worst Month (avg),July
+Time,Best Day of Week,Sunday
+Operations,Total Orders,"8,000"
+Operations,Return Rate,5.00%
+Operations,Revenue Lost to Refunds,4.99%
