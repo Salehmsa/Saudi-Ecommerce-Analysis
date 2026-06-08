@@ -27,7 +27,7 @@ A full 3-year performance audit for a Saudi e-commerce and retail company spanni
 ## Project Structure
 
 ```
-NoorTrade-Portfolio/
+Saudi-Ecommerce-Analysis/
 ├── NoorTrade_Analysis.ipynb   # Main analysis (27 KPIs, 12+ visualizations)
 ├── data/
 │   ├── noortrade_data.xlsx    # Dataset: Orders, Customers, Products, Returns
@@ -59,8 +59,8 @@ NoorTrade-Portfolio/
 ## How to Run
 
 ```bash
-git clone https://github.com/Salehmsa/NoorTrade-Sales-Analysis.git
-cd NoorTrade-Sales-Analysis
+git clone https://github.com/Salehmsa/Saudi-Ecommerce-Analysis.git
+cd Saudi-Ecommerce-Analysis
 pip install pandas numpy matplotlib seaborn openpyxl
 jupyter notebook NoorTrade_Analysis.ipynb
 ```
