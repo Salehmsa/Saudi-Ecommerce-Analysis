@@ -74,6 +74,32 @@
   .btn.primary:hover{background:var(--green-bright); border-color:var(--green-bright); color:#0B1E1A;}
   .btn svg{width:15px;height:15px; flex-shrink:0;}
 
+  .quicknav{
+    display:flex; gap:4px; overflow-x:auto; padding:0 28px 10px;
+    max-width:var(--maxw); margin:0 auto;
+  }
+  .quicknav::-webkit-scrollbar{display:none;}
+  .quicknav a{
+    flex-shrink:0; font-size:12.5px; color:var(--text-muted); text-decoration:none;
+    padding:6px 12px; border-radius:20px; border:1px solid var(--line);
+    white-space:nowrap; transition:border-color .15s ease, color .15s ease;
+  }
+  .quicknav a:hover, .quicknav a.active{ border-color:var(--green-bright); color:var(--green-bright); }
+
+  .filter-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;
+  }
+  .filter-row label{ font-size:12.5px; color:var(--text-muted); }
+  .filter-row select{
+    background:var(--surface-2); color:var(--text); border:1px solid var(--line-strong);
+    border-radius:var(--radius); padding:7px 10px; font-size:13px; font-family:inherit; cursor:pointer;
+  }
+  .filter-row select:focus{ outline:2px solid var(--green-bright); outline-offset:1px; }
+  tr.row-dim{ opacity:0.35; }
+  tr.row-highlight td:first-child{ color:var(--gold-soft); font-weight:600; }
+
+  section.block, section.hero{ scroll-margin-top: 96px; }
+
   /* ---------- Hero ---------- */
   .hero{padding:64px 0 40px; border-bottom:1px solid var(--line);}
   .kicker{
@@ -189,6 +215,7 @@
       </button>
     </div>
   </div>
+  <nav class="quicknav" id="quickNav"></nav>
 </header>
 
 <div class="wrap">
@@ -220,7 +247,7 @@
   </section>
 
   <!-- KPI GRID -->
-  <section class="block">
+  <section class="block" id="sec-kpi">
     <div class="block-head">
       <h2 data-i18n="kpiSectionTitle">Executive KPI Summary</h2>
       <span class="note" data-i18n="kpiSectionNote">8 of 27 computed KPIs</span>
@@ -238,7 +265,7 @@
   </section>
 
   <!-- REVENUE TREND -->
-  <section class="block">
+  <section class="block" id="sec-revenue">
     <div class="block-head">
       <h2 data-i18n="revTrendTitle">Revenue Trend & Growth</h2>
       <span class="note" data-i18n="revTrendNote">+20.04% (2022→2023) · +30.59% (2023→2024)</span>
@@ -250,7 +277,7 @@
   </section>
 
   <!-- CHANNEL -->
-  <section class="block">
+  <section class="block" id="sec-channel">
     <div class="block-head">
       <h2 data-i18n="channelTitle">Channel Performance</h2>
       <span class="note" data-i18n="channelNote">Online leads with 46.2% revenue share</span>
@@ -279,13 +306,17 @@
   </section>
 
   <!-- GEOGRAPHY -->
-  <section class="block">
+  <section class="block" id="sec-geography">
     <div class="block-head">
       <h2 data-i18n="geoTitle">Geographic Performance</h2>
       <span class="note" data-i18n="geoNote">Riyadh + Jeddah = 58.5% of revenue</span>
     </div>
     <div class="grid grid-2">
       <div class="card chart-card">
+        <div class="filter-row">
+          <label data-i18n="cityFilterLabel">Highlight a city</label>
+          <select id="cityFilter"></select>
+        </div>
         <div class="chart-holder tall"><canvas id="chartCity"></canvas></div>
       </div>
       <div class="card">
@@ -303,13 +334,17 @@
   </section>
 
   <!-- PRODUCT -->
-  <section class="block">
+  <section class="block" id="sec-product">
     <div class="block-head">
       <h2 data-i18n="prodTitle">Category & Product Performance</h2>
       <span class="note" data-i18n="prodNote">Sports leads revenue · Fashion leads margin</span>
     </div>
     <div class="grid grid-2">
       <div class="card chart-card">
+        <div class="filter-row">
+          <label data-i18n="catFilterLabel">Filter by category</label>
+          <select id="categoryFilter"></select>
+        </div>
         <div class="chart-holder"><canvas id="chartCategory"></canvas></div>
       </div>
       <div class="card">
@@ -319,8 +354,9 @@
     </div>
   </section>
 
+
   <!-- CUSTOMER -->
-  <section class="block">
+  <section class="block" id="sec-customer">
     <div class="block-head">
       <h2 data-i18n="custTitle">Customer Behavior</h2>
       <span class="note" data-i18n="custNote">92.05% repeat rate</span>
@@ -340,7 +376,7 @@
   </section>
 
   <!-- SEASONALITY -->
-  <section class="block">
+  <section class="block" id="sec-seasonality">
     <div class="block-head">
       <h2 data-i18n="seasonTitle">Seasonality</h2>
       <span class="note" data-i18n="seasonNote">Ramadan +40% · White Friday +120%</span>
@@ -354,7 +390,7 @@
   </section>
 
   <!-- RETURNS -->
-  <section class="block">
+  <section class="block" id="sec-returns">
     <div class="block-head">
       <h2 data-i18n="retTitle">Returns Analysis</h2>
       <span class="note" data-i18n="retNote">400 returns · 638,120 SAR refunded</span>
@@ -374,7 +410,7 @@
   </section>
 
   <!-- STRATEGIC RECOMMENDATIONS -->
-  <section class="block">
+  <section class="block" id="sec-recommendations">
     <div class="block-head">
       <h2 data-i18n="recTitle">Strategic Recommendations</h2>
       <span class="note" data-i18n="recNote">7 actions for 2025</span>
@@ -432,6 +468,11 @@ const T = {
     geoCaption:"Medina and Tabuk are growing fastest off a small base — early-mover opportunity outside the two anchor cities.",
     prodTitle:"Category & Product Performance", prodNote:"Sports leads revenue · Fashion leads margin",
     top10Label:"Top 10 products by revenue",
+    cityFilterLabel:"Highlight a city", allCities:"All cities",
+    catFilterLabel:"Filter by category", allCategories:"All categories",
+    navKpi:"KPIs", navRevenue:"Revenue", navChannel:"Channels", navGeo:"Geography",
+    navProduct:"Products", navCustomer:"Customers", navSeason:"Seasonality", navReturns:"Returns", navRec:"Recommendations",
+    noProductsInTop:"No top-10 products fall in this category — check the category chart for its overall share.",
     custTitle:"Customer Behavior", custNote:"92.05% repeat rate",
     custCaption:"Returning customers drive 95.2% of revenue — acquisition matters less here than retention and CLV growth.",
     kMedianCLV:"Median CLV", kMaxCLV:"Top spender CLV", kRepeatCount:"Repeat customers", kNewCount:"New customers",
@@ -484,6 +525,11 @@ const T = {
     geoCaption:"المدينة المنورة وتبوك هما الأسرع نموًا انطلاقًا من قاعدة صغيرة — فرصة للريادة المبكرة خارج المدينتين الرئيسيتين.",
     prodTitle:"أداء الفئات والمنتجات", prodNote:"الرياضة تتصدر الإيرادات · الأزياء تتصدر الهامش",
     top10Label:"أفضل 10 منتجات من حيث الإيرادات",
+    cityFilterLabel:"إبراز مدينة", allCities:"كل المدن",
+    catFilterLabel:"تصفية حسب الفئة", allCategories:"كل الفئات",
+    navKpi:"المؤشرات", navRevenue:"الإيرادات", navChannel:"القنوات", navGeo:"الجغرافيا",
+    navProduct:"المنتجات", navCustomer:"العملاء", navSeason:"الموسمية", navReturns:"المرتجعات", navRec:"التوصيات",
+    noProductsInTop:"لا توجد منتجات ضمن الأفضل 10 من هذه الفئة — راجع رسم الفئات البياني لمعرفة حصتها الإجمالية.",
     custTitle:"سلوك العملاء", custNote:"نسبة تكرار الشراء 92.05%",
     custCaption:"العملاء المتكررون يقودون 95.2% من الإيرادات — الاستبقاء ونمو القيمة الدائمة للعميل أهم هنا من اكتساب عملاء جدد.",
     kMedianCLV:"الوسيط للقيمة الدائمة للعميل", kMaxCLV:"أعلى قيمة دائمة لعميل", kRepeatCount:"العملاء المتكررون", kNewCount:"العملاء الجدد",
@@ -558,6 +604,8 @@ Chart.defaults.color = COLORS.muted;
 
 let charts = {};
 let currentLang = "en";
+let selectedCity = "all";
+let selectedCategory = "all";
 
 function fmtSAR(n){ return n.toLocaleString("en-US"); }
 
@@ -603,7 +651,7 @@ function buildCharts(lang){
     type:'bar',
     data:{ labels: cityLabels,
       datasets:[{ label: t.tShare, data: DATA.cities.map(c=>c.share),
-        backgroundColor: COLORS.greenBright, borderRadius:3, maxBarThickness:22 }]},
+        backgroundColor: cityBarColors(), borderRadius:3, maxBarThickness:22 }]},
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(ctx)=> ctx.parsed.x+"% "+t.tShare } } },
       scales:{ x:{ ticks:{...baseTicks, callback:(v)=>v+"%"}, grid:baseGrid },
@@ -616,7 +664,7 @@ function buildCharts(lang){
     type:'doughnut',
     data:{ labels: catLabels,
       datasets:[{ data: DATA.categories.map(c=>c.share),
-        backgroundColor:[COLORS.greenBright, COLORS.green, COLORS.gold, COLORS.goldSoft, COLORS.muted],
+        backgroundColor: categoryDonutColors(),
         borderColor:"#122E27", borderWidth:3 }]},
     options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
       plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14 } },
@@ -646,17 +694,88 @@ function buildCharts(lang){
   });
 }
 
+function cityBarColors(){
+  return DATA.cities.map(c=>{
+    if (selectedCity === "all") return COLORS.greenBright;
+    return c.key === selectedCity ? COLORS.gold : COLORS.greenBright + "28";
+  });
+}
+
+function categoryDonutColors(){
+  const base = [COLORS.greenBright, COLORS.green, COLORS.gold, COLORS.goldSoft, COLORS.muted];
+  return DATA.categories.map((c,i)=>{
+    if (selectedCategory === "all") return base[i];
+    return c.key === selectedCategory ? base[i] : base[i] + "28";
+  });
+}
+
+function updateCityHighlight(){
+  if (!charts.city) return;
+  charts.city.data.datasets[0].backgroundColor = cityBarColors();
+  charts.city.update();
+}
+
+function updateCategoryHighlight(){
+  if (!charts.category) return;
+  charts.category.data.datasets[0].backgroundColor = categoryDonutColors();
+  charts.category.update();
+}
+
+function updateCityTableHighlight(){
+  document.querySelectorAll('#cityTableBody tr').forEach(tr=>{
+    const key = tr.getAttribute('data-city');
+    tr.classList.remove('row-dim','row-highlight');
+    if (selectedCity === "all") return;
+    tr.classList.add(key === selectedCity ? 'row-highlight' : 'row-dim');
+  });
+}
+
+function buildQuickNav(lang){
+  const t = T[lang];
+  const items = [
+    ['sec-kpi', t.navKpi], ['sec-revenue', t.navRevenue], ['sec-channel', t.navChannel],
+    ['sec-geography', t.navGeo], ['sec-product', t.navProduct], ['sec-customer', t.navCustomer],
+    ['sec-seasonality', t.navSeason], ['sec-returns', t.navReturns], ['sec-recommendations', t.navRec]
+  ];
+  document.getElementById('quickNav').innerHTML = items.map(([id,label])=>`<a href="#${id}">${label}</a>`).join('');
+}
+
+function populateFilters(lang){
+  const t = T[lang];
+  const citySel = document.getElementById('cityFilter');
+  citySel.innerHTML = `<option value="all">${t.allCities}</option>` +
+    DATA.cities.map(c=>`<option value="${c.key}">${t.cities[c.key]}</option>`).join('');
+  citySel.value = selectedCity;
+  citySel.onchange = (e)=>{ selectedCity = e.target.value; updateCityHighlight(); updateCityTableHighlight(); };
+
+  const catSel = document.getElementById('categoryFilter');
+  catSel.innerHTML = `<option value="all">${t.allCategories}</option>` +
+    DATA.categories.map(c=>`<option value="${c.key}">${t.categories[c.key]}</option>`).join('');
+  catSel.value = selectedCategory;
+  catSel.onchange = (e)=>{ selectedCategory = e.target.value; updateCategoryHighlight(); renderProductList(lang); };
+}
+
+function renderProductList(lang){
+  const t = T[lang];
+  const list = document.getElementById('topProductsList');
+  const filtered = selectedCategory === "all" ? t.products : t.products.filter(p=>p[1]===selectedCategory);
+  if (filtered.length === 0){
+    list.innerHTML = `<li style="border-bottom:none; color:var(--text-faint); font-size:13px;">${t.noProductsInTop}</li>`;
+    return;
+  }
+  list.innerHTML = filtered.map((p,i)=>
+    `<li><span class="tp-name"><span class="tp-rank">${i+1}</span>${p[0]} <span class="tp-cat">· ${t.categories[p[1]] || p[1]}</span></span><span class="tp-val">${p[2]} SAR</span></li>`
+  ).join("");
+}
+
 function renderTables(lang){
   const t = T[lang];
   const cityBody = document.getElementById('cityTableBody');
   cityBody.innerHTML = DATA.cities.map(c=>
-    `<tr><td>${t.cities[c.key]}</td><td class="num-cell num">${c.share}%</td><td class="num-cell num"><span class="pill up">+${c.growth}%</span></td></tr>`
+    `<tr data-city="${c.key}"><td>${t.cities[c.key]}</td><td class="num-cell num">${c.share}%</td><td class="num-cell num"><span class="pill up">+${c.growth}%</span></td></tr>`
   ).join("");
 
-  const list = document.getElementById('topProductsList');
-  list.innerHTML = t.products.map((p,i)=>
-    `<li><span class="tp-name"><span class="tp-rank">${i+1}</span>${p[0]} <span class="tp-cat">· ${t.categories[p[1]] || p[1]}</span></span><span class="tp-val">${p[2]} SAR</span></li>`
-  ).join("");
+  renderProductList(lang);
 
   const recs = document.getElementById('recList');
   recs.innerHTML = t.recs.map((r,i)=>
@@ -683,6 +802,9 @@ function applyLang(lang){
   });
 
   renderTables(lang);
+  updateCityTableHighlight();
+  buildQuickNav(lang);
+  populateFilters(lang);
   destroyCharts();
   buildCharts(lang);
 }
