@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoorTrade — Executive Sales Performance Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0B1E1A;
+    --bg-2:#0F2620;
+    --surface:#122E27;
+    --surface-2:#16362E;
+    --line: rgba(243,240,231,0.10);
+    --line-strong: rgba(243,240,231,0.18);
+    --green: #1E8F5E;
+    --green-bright:#39C784;
+    --gold:#C9A227;
+    --gold-soft:#E4C765;
+    --rust:#C1584A;
+    --text:#F3F0E7;
+    --text-muted:#8FA79E;
+    --text-faint:#607068;
+    --radius: 3px;
+    --maxw: 1120px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(30,143,94,0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(201,162,39,0.07), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans Arabic', 'Segoe UI', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  [dir="rtl"] body{ font-family:'IBM Plex Sans Arabic', 'Segoe UI', sans-serif; }
+  .num, .mono{ font-family:'IBM Plex Mono','IBM Plex Sans Arabic',monospace; font-feature-settings:"tnum" 1; }
+
+  a{color:inherit;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+
+  /* ---------- Header ---------- */
+  header.top{
+    position:sticky; top:0; z-index:50;
+    background:rgba(11,30,26,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; max-width:var(--maxw); margin:0 auto; gap:16px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; letter-spacing:0.2px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--green-bright); box-shadow:0 0 10px var(--green-bright);}
+  .top-actions{display:flex; align-items:center; gap:10px;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:9px 16px; border-radius:var(--radius);
+    border:1px solid var(--line-strong);
+    background:transparent; color:var(--text);
+    font-size:13.5px; font-weight:500; cursor:pointer;
+    text-decoration:none; transition:border-color .15s ease, background .15s ease;
+    font-family:inherit;
+  }
+  .btn:hover{border-color:var(--green-bright); background:rgba(57,199,132,0.08);}
+  .btn.primary{background:var(--green); border-color:var(--green);}
+  .btn.primary:hover{background:var(--green-bright); border-color:var(--green-bright); color:#0B1E1A;}
+  .btn svg{width:15px;height:15px; flex-shrink:0;}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:64px 0 40px; border-bottom:1px solid var(--line);}
+  .kicker{
+    font-size:13.5px; color:var(--gold-soft); font-weight:600; margin-bottom:14px;
+    display:block;
+  }
+  h1{
+    font-size:clamp(28px,3.6vw,42px); line-height:1.28; font-weight:700;
+    margin:0 0 18px; max-width:820px; letter-spacing:-0.01px;
+  }
+  .lede{color:var(--text-muted); font-size:16px; max-width:640px; margin:0 0 40px;}
+  .ledger{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    border-top:1px solid var(--line-strong);
+  }
+  .ledger-item{
+    padding:20px 22px 20px 0; border-bottom:1px solid var(--line-strong);
+  }
+  [dir="rtl"] .ledger-item{padding:20px 0 20px 22px;}
+  .ledger-item + .ledger-item{border-inline-start:1px solid var(--line-strong); padding-inline-start:24px;}
+  .ledger-num{font-size:clamp(22px,2.6vw,32px); font-weight:600; color:var(--text); display:block;}
+  .ledger-num.gold{color:var(--gold-soft);}
+  .ledger-num.green{color:var(--green-bright);}
+  .ledger-label{font-size:12.5px; color:var(--text-muted); margin-top:6px; display:block;}
+
+  @media (max-width:760px){
+    .ledger{grid-template-columns:repeat(2,1fr);}
+  }
+
+  /* ---------- Sections ---------- */
+  section.block{padding:54px 0; border-bottom:1px solid var(--line);}
+  .block-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; margin-bottom:28px; flex-wrap:wrap;}
+  .block-head h2{font-size:22px; font-weight:700; margin:0;}
+  .block-head .note{font-size:13px; color:var(--text-faint);}
+
+  .grid{display:grid; gap:16px;}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  .grid-2{grid-template-columns:1.1fr 0.9fr;}
+  @media (max-width:900px){ .grid-4{grid-template-columns:repeat(2,1fr);} .grid-2{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+  }
+  .kpi-card .kpi-label{font-size:12.5px; color:var(--text-muted); margin-bottom:10px;}
+  .kpi-card .kpi-value{font-size:26px; font-weight:600;}
+  .kpi-card .kpi-sub{font-size:12px; color:var(--text-faint); margin-top:6px;}
+
+  .chart-card{padding:22px;}
+  .chart-holder{position:relative; height:280px;}
+  .chart-holder.tall{height:340px;}
+  .chart-caption{font-size:12.5px; color:var(--text-faint); margin-top:14px; border-top:1px solid var(--line); padding-top:12px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th,td{text-align:start; padding:9px 10px; border-bottom:1px solid var(--line);}
+  th{color:var(--text-muted); font-weight:600; font-size:12px;}
+  td.num-cell, th.num-cell{text-align:end;}
+  tr:last-child td{border-bottom:none;}
+  .pill{
+    display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600;
+  }
+  .pill.up{background:rgba(57,199,132,0.14); color:var(--green-bright);}
+
+  .rec-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0;}
+  .rec-list li{
+    display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--line);
+    align-items:flex-start;
+  }
+  .rec-list li:last-child{border-bottom:none;}
+  .rec-num{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--gold-soft);
+    min-width:26px; padding-top:2px; flex-shrink:0;
+  }
+  .rec-text{font-size:14.5px; color:var(--text);}
+
+  .top-products{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0;}
+  .top-products li{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:10px 0; border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  .top-products li:last-child{border-bottom:none;}
+  .tp-name{display:flex; align-items:center; gap:10px;}
+  .tp-rank{color:var(--text-faint); font-family:'IBM Plex Mono',monospace; font-size:12px; width:18px;}
+  .tp-cat{color:var(--text-faint); font-size:11.5px;}
+  .tp-val{font-family:'IBM Plex Mono',monospace; color:var(--gold-soft); flex-shrink:0;}
+
+  footer{padding:40px 0 60px;}
+  .foot-grid{display:flex; justify-content:space-between; flex-wrap:wrap; gap:24px; font-size:13px; color:var(--text-muted);}
+  .foot-grid strong{color:var(--text); display:block; margin-bottom:6px; font-size:13.5px;}
+  .stack-tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .stack-tags span{
+    border:1px solid var(--line-strong); padding:4px 10px; border-radius:20px; font-size:11.5px; color:var(--text-muted);
+  }
+
+  [data-i18n], [data-i18n-html]{}
+  html[lang="ar"] .num-latin{direction:ltr; unicode-bidi:isolate; display:inline-block;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="dot"></span><span data-i18n="brand">NoorTrade Analytics</span></div>
+    <div class="top-actions">
+      <a class="btn" href="https://github.com/Salehmsa/Saudi-Ecommerce-Analysis" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-i18n="viewGithub">View on GitHub</span>
+      </a>
+      <button class="btn primary" id="langToggle" type="button">
+        <span id="langToggleLabel">العربية</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <span class="kicker" data-i18n="kicker">Executive Sales Performance Audit · 2022–2024</span>
+    <h1 data-i18n="heroQuestion">How did NoorTrade perform across 2022–2024, and what are the strategic opportunities for 2025?</h1>
+    <p class="lede" data-i18n="heroLede">A full three-year performance audit for a Saudi e-commerce and retail company spanning 8 cities, 5 product categories, and 8,000+ transactions — 27 KPIs computed end-to-end in Python.</p>
+
+    <div class="ledger">
+      <div class="ledger-item">
+        <span class="ledger-num num">12,793,767 <span style="font-size:15px;color:var(--text-muted);">SAR</span></span>
+        <span class="ledger-label" data-i18n="kpiRevenue3y">Total revenue, 3 years</span>
+      </div>
+      <div class="ledger-item">
+        <span class="ledger-num num green">33.39%</span>
+        <span class="ledger-label" data-i18n="kpiMargin">Overall profit margin</span>
+      </div>
+      <div class="ledger-item">
+        <span class="ledger-num num gold">+30.59%</span>
+        <span class="ledger-label" data-i18n="kpiYoy2024">YoY growth, 2023 → 2024</span>
+      </div>
+      <div class="ledger-item">
+        <span class="ledger-num num">1,976</span>
+        <span class="ledger-label" data-i18n="kpiCustomers">Unique customers</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI GRID -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="kpiSectionTitle">Executive KPI Summary</h2>
+      <span class="note" data-i18n="kpiSectionNote">8 of 27 computed KPIs</span>
+    </div>
+    <div class="grid grid-4">
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kAov">Average order value</div><div class="kpi-value num">1,599.22 <span style="font-size:14px;">SAR</span></div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kOrders">Total orders</div><div class="kpi-value num">8,000</div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kProfit">Total profit</div><div class="kpi-value num">4,271,625 <span style="font-size:14px;">SAR</span></div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kRevPerCust">Revenue per customer</div><div class="kpi-value num">6,474.58 <span style="font-size:14px;">SAR</span></div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kRepeat">Repeat customer rate</div><div class="kpi-value num">92.05%</div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kCLV">Average CLV</div><div class="kpi-value num">6,474.58 <span style="font-size:14px;">SAR</span></div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kReturnRate">Return rate</div><div class="kpi-value num">5.00%</div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="kRefundLoss">Revenue lost to refunds</div><div class="kpi-value num">4.99%</div></div>
+    </div>
+  </section>
+
+  <!-- REVENUE TREND -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="revTrendTitle">Revenue Trend & Growth</h2>
+      <span class="note" data-i18n="revTrendNote">+20.04% (2022→2023) · +30.59% (2023→2024)</span>
+    </div>
+    <div class="card chart-card">
+      <div class="chart-holder"><canvas id="chartRevenue"></canvas></div>
+      <div class="chart-caption" data-i18n="revTrendCaption">Annual split is derived from the reported year-over-year growth rates and the 3-year total, since the source dataset publishes YoY % rather than a stored annual figure.</div>
+    </div>
+  </section>
+
+  <!-- CHANNEL -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="channelTitle">Channel Performance</h2>
+      <span class="note" data-i18n="channelNote">Online leads with 46.2% revenue share</span>
+    </div>
+    <div class="grid grid-2">
+      <div class="card chart-card">
+        <div class="chart-holder"><canvas id="chartChannel"></canvas></div>
+        <div class="chart-caption" data-i18n="channelCaption">Channel mix has shifted decisively toward Online and App since 2022, at the expense of physical stores.</div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr>
+            <th data-i18n="tChannel">Channel</th>
+            <th class="num-cell" data-i18n="tRevenue">Revenue (SAR)</th>
+            <th class="num-cell" data-i18n="tShare">Share</th>
+            <th class="num-cell" data-i18n="tMargin">Margin</th>
+          </tr></thead>
+          <tbody>
+            <tr><td data-i18n="chOnline">Online</td><td class="num-cell num">5,912,738</td><td class="num-cell num">46.22%</td><td class="num-cell num">33.45%</td></tr>
+            <tr><td data-i18n="chStore">Store</td><td class="num-cell num">3,906,655</td><td class="num-cell num">30.54%</td><td class="num-cell num">33.39%</td></tr>
+            <tr><td data-i18n="chApp">App</td><td class="num-cell num">2,974,375</td><td class="num-cell num">23.25%</td><td class="num-cell num">33.27%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- GEOGRAPHY -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="geoTitle">Geographic Performance</h2>
+      <span class="note" data-i18n="geoNote">Riyadh + Jeddah = 58.5% of revenue</span>
+    </div>
+    <div class="grid grid-2">
+      <div class="card chart-card">
+        <div class="chart-holder tall"><canvas id="chartCity"></canvas></div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr>
+            <th data-i18n="tCity">City</th>
+            <th class="num-cell" data-i18n="tShare">Share</th>
+            <th class="num-cell" data-i18n="tGrowth">Growth '22–'24</th>
+          </tr></thead>
+          <tbody id="cityTableBody"></tbody>
+        </table>
+        <div class="chart-caption" data-i18n="geoCaption">Medina and Tabuk are growing fastest off a small base — early-mover opportunity outside the two anchor cities.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="prodTitle">Category & Product Performance</h2>
+      <span class="note" data-i18n="prodNote">Sports leads revenue · Fashion leads margin</span>
+    </div>
+    <div class="grid grid-2">
+      <div class="card chart-card">
+        <div class="chart-holder"><canvas id="chartCategory"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="kpi-label" style="margin-bottom:10px;" data-i18n="top10Label">Top 10 products by revenue</div>
+        <ul class="top-products" id="topProductsList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOMER -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="custTitle">Customer Behavior</h2>
+      <span class="note" data-i18n="custNote">92.05% repeat rate</span>
+    </div>
+    <div class="grid grid-2">
+      <div class="card chart-card">
+        <div class="chart-holder"><canvas id="chartCustomer"></canvas></div>
+        <div class="chart-caption" data-i18n="custCaption">Returning customers drive 95.2% of revenue — acquisition matters less here than retention and CLV growth.</div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="card kpi-card"><div class="kpi-label" data-i18n="kMedianCLV">Median CLV</div><div class="kpi-value num">5,168.27 <span style="font-size:13px;">SAR</span></div></div>
+        <div class="card kpi-card"><div class="kpi-label" data-i18n="kMaxCLV">Top spender CLV</div><div class="kpi-value num">36,489 <span style="font-size:13px;">SAR</span></div></div>
+        <div class="card kpi-card"><div class="kpi-label" data-i18n="kRepeatCount">Repeat customers</div><div class="kpi-value num">1,819</div></div>
+        <div class="card kpi-card"><div class="kpi-label" data-i18n="kNewCount">New customers</div><div class="kpi-value num">256</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEASONALITY -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="seasonTitle">Seasonality</h2>
+      <span class="note" data-i18n="seasonNote">Ramadan +40% · White Friday +120%</span>
+    </div>
+    <div class="grid grid-4">
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="sBestMonth">Best month (avg. daily revenue)</div><div class="kpi-value" data-i18n="sJan">January</div><div class="kpi-sub num">1,693 SAR</div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="sWorstMonth">Weakest month (avg. daily revenue)</div><div class="kpi-value" data-i18n="sJul">July</div><div class="kpi-sub num">1,441 SAR</div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="sBestDay">Best day of week</div><div class="kpi-value" data-i18n="sSun">Sunday</div><div class="kpi-sub num">1,980,919 SAR total</div></div>
+      <div class="card kpi-card"><div class="kpi-label" data-i18n="sWorstDay">Weakest day of week</div><div class="kpi-value" data-i18n="sMon">Monday</div><div class="kpi-sub num">1,687,528 SAR total</div></div>
+    </div>
+  </section>
+
+  <!-- RETURNS -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="retTitle">Returns Analysis</h2>
+      <span class="note" data-i18n="retNote">400 returns · 638,120 SAR refunded</span>
+    </div>
+    <div class="grid grid-2">
+      <div class="card chart-card">
+        <div class="chart-holder"><canvas id="chartReturns"></canvas></div>
+      </div>
+      <div class="card">
+        <p style="font-size:14px; color:var(--text-muted); margin-top:0;" data-i18n="retBody">Operational failures — wrong item and damage in transit — account for 35% of all returns, and are the most directly fixable through fulfillment and packaging QA.</p>
+        <div class="grid" style="grid-template-columns:1fr 1fr; gap:14px; margin-top:6px;">
+          <div class="kpi-card" style="padding:0;"><div class="kpi-label" data-i18n="kReturnRate2">Return rate</div><div class="kpi-value num" style="font-size:22px;">5.00%</div></div>
+          <div class="kpi-card" style="padding:0;"><div class="kpi-label" data-i18n="kRefundLoss2">Revenue lost to refunds</div><div class="kpi-value num" style="font-size:22px;">4.99%</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRATEGIC RECOMMENDATIONS -->
+  <section class="block">
+    <div class="block-head">
+      <h2 data-i18n="recTitle">Strategic Recommendations</h2>
+      <span class="note" data-i18n="recNote">7 actions for 2025</span>
+    </div>
+    <div class="card">
+      <ol class="rec-list" id="recList" style="list-style:none;"></ol>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-grid">
+      <div>
+        <strong data-i18n="footAuthor">Saleh Mahbub — Junior Data Scientist, IBM-certified</strong>
+        <span data-i18n="footLocation">Riyadh, Saudi Arabia</span><br>
+        <a href="https://github.com/Salehmsa" target="_blank" rel="noopener" style="color:var(--green-bright);">github.com/Salehmsa</a>
+      </div>
+      <div>
+        <strong data-i18n="footStackTitle">Tech stack</strong>
+        <div class="stack-tags">
+          <span>pandas</span><span>numpy</span><span>matplotlib</span><span>seaborn</span><span>openpyxl</span>
+        </div>
+      </div>
+      <div>
+        <strong data-i18n="footRepoTitle">Source repository</strong>
+        <a href="https://github.com/Salehmsa/Saudi-Ecommerce-Analysis" target="_blank" rel="noopener" style="color:var(--green-bright);">Saudi-Ecommerce-Analysis</a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ============================================================
+   TRANSLATIONS
+   ============================================================ */
+const T = {
+  en: {
+    brand:"NoorTrade Analytics", viewGithub:"View on GitHub",
+    kicker:"Executive Sales Performance Audit · 2022–2024",
+    heroQuestion:"How did NoorTrade perform across 2022–2024, and what are the strategic opportunities for 2025?",
+    heroLede:"A full three-year performance audit for a Saudi e-commerce and retail company spanning 8 cities, 5 product categories, and 8,000+ transactions — 27 KPIs computed end-to-end in Python.",
+    kpiRevenue3y:"Total revenue, 3 years", kpiMargin:"Overall profit margin", kpiYoy2024:"YoY growth, 2023 → 2024", kpiCustomers:"Unique customers",
+    kpiSectionTitle:"Executive KPI Summary", kpiSectionNote:"8 of 27 computed KPIs",
+    kAov:"Average order value", kOrders:"Total orders", kProfit:"Total profit", kRevPerCust:"Revenue per customer",
+    kRepeat:"Repeat customer rate", kCLV:"Average CLV", kReturnRate:"Return rate", kRefundLoss:"Revenue lost to refunds",
+    revTrendTitle:"Revenue Trend & Growth", revTrendNote:"+20.04% (2022→2023) · +30.59% (2023→2024)",
+    revTrendCaption:"Annual split is derived from the reported year-over-year growth rates and the 3-year total, since the source dataset publishes YoY % rather than a stored annual figure.",
+    channelTitle:"Channel Performance", channelNote:"Online leads with 46.2% revenue share",
+    channelCaption:"Channel mix has shifted decisively toward Online and App since 2022, at the expense of physical stores.",
+    tChannel:"Channel", tRevenue:"Revenue (SAR)", tShare:"Share", tMargin:"Margin",
+    chOnline:"Online", chStore:"Store", chApp:"App",
+    geoTitle:"Geographic Performance", geoNote:"Riyadh + Jeddah = 58.5% of revenue",
+    tCity:"City", tGrowth:"Growth '22–'24",
+    geoCaption:"Medina and Tabuk are growing fastest off a small base — early-mover opportunity outside the two anchor cities.",
+    prodTitle:"Category & Product Performance", prodNote:"Sports leads revenue · Fashion leads margin",
+    top10Label:"Top 10 products by revenue",
+    custTitle:"Customer Behavior", custNote:"92.05% repeat rate",
+    custCaption:"Returning customers drive 95.2% of revenue — acquisition matters less here than retention and CLV growth.",
+    kMedianCLV:"Median CLV", kMaxCLV:"Top spender CLV", kRepeatCount:"Repeat customers", kNewCount:"New customers",
+    seasonTitle:"Seasonality", seasonNote:"Ramadan +40% · White Friday +120%",
+    sBestMonth:"Best month (avg. daily revenue)", sWorstMonth:"Weakest month (avg. daily revenue)",
+    sBestDay:"Best day of week", sWorstDay:"Weakest day of week",
+    sJan:"January", sJul:"July", sSun:"Sunday", sMon:"Monday",
+    retTitle:"Returns Analysis", retNote:"400 returns · 638,120 SAR refunded",
+    retBody:"Operational failures — wrong item and damage in transit — account for 35% of all returns, and are the most directly fixable through fulfillment and packaging QA.",
+    kReturnRate2:"Return rate", kRefundLoss2:"Revenue lost to refunds",
+    recTitle:"Strategic Recommendations", recNote:"7 actions for 2025",
+    footAuthor:"Saleh Mahbub — Junior Data Scientist, IBM-certified", footLocation:"Riyadh, Saudi Arabia",
+    footStackTitle:"Tech stack", footRepoTitle:"Source repository",
+    cities:{Riyadh:"Riyadh",Jeddah:"Jeddah",Dammam:"Dammam",Khobar:"Khobar",Mecca:"Mecca",Medina:"Medina",Tabuk:"Tabuk",Abha:"Abha"},
+    categories:{Sports:"Sports",Electronics:"Electronics",Home:"Home",Fashion:"Fashion",Beauty:"Beauty"},
+    reasons:{"Not as Described":"Not as Described","Changed Mind":"Changed Mind","Defective":"Defective","Damaged in Transit":"Damaged in Transit","Wrong Item":"Wrong Item","Size Issue":"Size Issue"},
+    newVsReturning:["New customers","Returning customers"],
+    products:[
+      ["Dumbbells","Sports","1,467,233"],["Sportswear","Sports","1,331,267"],["Tablet","Electronics","1,212,946"],
+      ["Bedding Set","Home","940,249"],["Bicycle","Sports","759,120"],["Monitor","Electronics","605,971"],
+      ["Laptop","Electronics","532,820"],["Thobe","Fashion","494,594"],["Lamp","Home","426,125"],["Coffee Maker","Home","415,513"]
+    ],
+    recs:[
+      "Double down on the channels and cities driving 22% YoY growth",
+      "Accelerate App investment — the highest-AOV channel",
+      "Expand aggressively in Khobar & Abha — fastest growing, lower competition",
+      "Build a 90-day Ramadan calendar and a post-Eid retention campaign",
+      "Launch a loyalty program targeting one-time buyers",
+      "Bundle high-margin categories with high-volume, low-margin products",
+      "Fix operational return causes — wrong item + damaged in transit are 35% of returns"
+    ]
+  },
+  ar: {
+    brand:"نور تريد للتحليلات", viewGithub:"عرض على GitHub",
+    kicker:"تحليل تنفيذي لأداء المبيعات · 2022–2024",
+    heroQuestion:"كيف كان أداء نور تريد خلال الفترة 2022–2024، وما هي الفرص الاستراتيجية لعام 2025؟",
+    heroLede:"تحليل تنفيذي شامل لثلاث سنوات لشركة تجارة إلكترونية وتجزئة سعودية، يغطي 8 مدن و5 فئات منتجات وأكثر من 8,000 عملية بيع — 27 مؤشر أداء محسوبة بالكامل بلغة Python.",
+    kpiRevenue3y:"إجمالي الإيرادات (3 سنوات)", kpiMargin:"هامش الربح الإجمالي", kpiYoy2024:"النمو السنوي 2023 ← 2024", kpiCustomers:"عدد العملاء الفريدين",
+    kpiSectionTitle:"ملخص مؤشرات الأداء التنفيذية", kpiSectionNote:"8 من أصل 27 مؤشر أداء محسوب",
+    kAov:"متوسط قيمة الطلب", kOrders:"إجمالي الطلبات", kProfit:"إجمالي الأرباح", kRevPerCust:"الإيراد لكل عميل",
+    kRepeat:"نسبة العملاء المتكررين", kCLV:"متوسط القيمة الدائمة للعميل", kReturnRate:"نسبة المرتجعات", kRefundLoss:"إيرادات مفقودة بسبب الاسترجاع",
+    revTrendTitle:"اتجاه الإيرادات والنمو", revTrendNote:"+20.04% (2022←2023) · +30.59% (2023←2024)",
+    revTrendCaption:"التوزيع السنوي مُشتق من معدلات النمو السنوي المعلنة والإجمالي التراكمي لثلاث سنوات، لأن مصدر البيانات ينشر نسب النمو السنوي وليس رقمًا سنويًا مخزّنًا مباشرة.",
+    channelTitle:"أداء قنوات البيع", channelNote:"الأونلاين يتصدر بحصة 46.2% من الإيرادات",
+    channelCaption:"تحوّل مزيج القنوات بشكل حاسم نحو الأونلاين والتطبيق منذ 2022، على حساب المتاجر الفعلية.",
+    tChannel:"القناة", tRevenue:"الإيرادات (ريال)", tShare:"الحصة", tMargin:"الهامش",
+    chOnline:"أونلاين", chStore:"المتجر", chApp:"التطبيق",
+    geoTitle:"الأداء الجغرافي", geoNote:"الرياض + جدة = 58.5% من الإيرادات",
+    tCity:"المدينة", tGrowth:"النمو 22–24",
+    geoCaption:"المدينة المنورة وتبوك هما الأسرع نموًا انطلاقًا من قاعدة صغيرة — فرصة للريادة المبكرة خارج المدينتين الرئيسيتين.",
+    prodTitle:"أداء الفئات والمنتجات", prodNote:"الرياضة تتصدر الإيرادات · الأزياء تتصدر الهامش",
+    top10Label:"أفضل 10 منتجات من حيث الإيرادات",
+    custTitle:"سلوك العملاء", custNote:"نسبة تكرار الشراء 92.05%",
+    custCaption:"العملاء المتكررون يقودون 95.2% من الإيرادات — الاستبقاء ونمو القيمة الدائمة للعميل أهم هنا من اكتساب عملاء جدد.",
+    kMedianCLV:"الوسيط للقيمة الدائمة للعميل", kMaxCLV:"أعلى قيمة دائمة لعميل", kRepeatCount:"العملاء المتكررون", kNewCount:"العملاء الجدد",
+    seasonTitle:"الأنماط الموسمية", seasonNote:"رمضان ‎+40%‎ · الجمعة البيضاء ‎+120%‎",
+    sBestMonth:"أفضل شهر (متوسط الإيراد اليومي)", sWorstMonth:"أضعف شهر (متوسط الإيراد اليومي)",
+    sBestDay:"أفضل يوم في الأسبوع", sWorstDay:"أضعف يوم في الأسبوع",
+    sJan:"يناير", sJul:"يوليو", sSun:"الأحد", sMon:"الاثنين",
+    retTitle:"تحليل المرتجعات", retNote:"400 عملية إرجاع · 638,120 ريال مسترد",
+    retBody:"الأعطال التشغيلية — المنتج الخاطئ والتلف أثناء الشحن — تمثل 35% من إجمالي المرتجعات، وهي الأكثر قابلية للمعالجة المباشرة عبر ضبط جودة التغليف والشحن.",
+    kReturnRate2:"نسبة المرتجعات", kRefundLoss2:"إيرادات مفقودة بسبب الاسترجاع",
+    recTitle:"التوصيات الاستراتيجية", recNote:"7 إجراءات لعام 2025",
+    footAuthor:"صالح محبوب — عالم بيانات مبتدئ، معتمد من IBM", footLocation:"الرياض، المملكة العربية السعودية",
+    footStackTitle:"الأدوات المستخدمة", footRepoTitle:"مستودع المصدر",
+    cities:{Riyadh:"الرياض",Jeddah:"جدة",Dammam:"الدمام",Khobar:"الخبر",Mecca:"مكة المكرمة",Medina:"المدينة المنورة",Tabuk:"تبوك",Abha:"أبها"},
+    categories:{Sports:"الرياضة",Electronics:"الإلكترونيات",Home:"المنزل",Fashion:"الأزياء",Beauty:"الجمال"},
+    reasons:{"Not as Described":"غير مطابق للوصف","Changed Mind":"تغيير الرأي","Defective":"عيب في المنتج","Damaged in Transit":"تلف أثناء الشحن","Wrong Item":"منتج خاطئ","Size Issue":"مشكلة في المقاس"},
+    newVsReturning:["عملاء جدد","عملاء متكررون"],
+    products:[
+      ["دمبل","Sports","1,467,233"],["ملابس رياضية","Sports","1,331,267"],["جهاز لوحي","Electronics","1,212,946"],
+      ["طقم مفروشات","Home","940,249"],["دراجة هوائية","Sports","759,120"],["شاشة عرض","Electronics","605,971"],
+      ["لابتوب","Electronics","532,820"],["ثوب","Fashion","494,594"],["مصباح","Home","426,125"],["ماكينة قهوة","Home","415,513"]
+    ],
+    recs:[
+      "التركيز على القنوات والمدن التي تقود نمو 22% سنويًا",
+      "تسريع الاستثمار في التطبيق — القناة الأعلى في متوسط قيمة الطلب",
+      "التوسع بقوة في الخبر وأبها — الأسرع نموًا والأقل منافسة",
+      "بناء خطة تسويقية لرمضان مدتها 90 يومًا مع حملة استبقاء بعد العيد",
+      "إطلاق برنامج ولاء يستهدف العملاء ذوي عملية الشراء الواحدة",
+      "تجميع الفئات عالية الهامش مع المنتجات عالية الحجم ومنخفضة الهامش",
+      "معالجة أسباب المرتجعات التشغيلية — المنتج الخاطئ والتالف يمثلان 35% من المرتجعات"
+    ]
+  }
+};
+
+/* ============================================================
+   RAW DATA
+   ============================================================ */
+const DATA = {
+  years:[2022,2023,2024],
+  revenueByYear:[3395767,4076000,5322000], // derived, see caption
+  channelShareByYear:{ App:[17.90,24.90,25.40], Online:[39.50,42.80,53.10], Store:[42.60,32.30,21.50] },
+  cities:[
+    {key:"Riyadh",share:35.07,growth:50.53},
+    {key:"Jeddah",share:23.48,growth:48.80},
+    {key:"Dammam",share:11.25,growth:46.00},
+    {key:"Khobar",share:8.77,growth:74.69},
+    {key:"Mecca",share:6.29,growth:73.18},
+    {key:"Medina",share:5.62,growth:94.50},
+    {key:"Tabuk",share:5.09,growth:86.99},
+    {key:"Abha",share:4.44,growth:59.64}
+  ],
+  categories:[
+    {key:"Sports",share:31.16},{key:"Electronics",share:28.93},{key:"Home",share:17.60},
+    {key:"Fashion",share:11.62},{key:"Beauty",share:10.69}
+  ],
+  newVsReturningRevenue:[607904,12185863],
+  returnReasons:[
+    {key:"Not as Described",n:83},{key:"Changed Mind",n:74},{key:"Defective",n:73},
+    {key:"Damaged in Transit",n:71},{key:"Wrong Item",n:64},{key:"Size Issue",n:35}
+  ]
+};
+
+/* ============================================================
+   THEME
+   ============================================================ */
+const COLORS = {
+  green:"#1E8F5E", greenBright:"#39C784", gold:"#C9A227", goldSoft:"#E4C765",
+  rust:"#C1584A", text:"#F3F0E7", muted:"#8FA79E", grid:"rgba(243,240,231,0.08)"
+};
+Chart.defaults.font.family = "'IBM Plex Sans Arabic','IBM Plex Mono',sans-serif";
+Chart.defaults.color = COLORS.muted;
+
+let charts = {};
+let currentLang = "en";
+
+function fmtSAR(n){ return n.toLocaleString("en-US"); }
+
+function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts={}; }
+
+function buildCharts(lang){
+  const t = T[lang];
+  const baseGrid = { color: COLORS.grid };
+  const baseTicks = { color: COLORS.muted, font:{size:11} };
+
+  // Revenue trend
+  charts.revenue = new Chart(document.getElementById('chartRevenue'), {
+    type:'bar',
+    data:{ labels: DATA.years.map(String),
+      datasets:[{ label: t.kpiRevenue3y, data: DATA.revenueByYear,
+        backgroundColor:[COLORS.green, COLORS.greenBright, COLORS.gold], borderRadius:3, maxBarThickness:70 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ label:(ctx)=> fmtSAR(ctx.parsed.y) + " SAR" } } },
+      scales:{ x:{ ticks:baseTicks, grid:{display:false} },
+        y:{ ticks:{...baseTicks, callback:(v)=> (v/1e6).toFixed(1)+"M"}, grid:baseGrid } } }
+  });
+
+  // Channel stacked
+  charts.channel = new Chart(document.getElementById('chartChannel'), {
+    type:'bar',
+    data:{ labels: DATA.years.map(String),
+      datasets:[
+        { label:t.chOnline, data:DATA.channelShareByYear.Online, backgroundColor:COLORS.greenBright, stack:'s' },
+        { label:t.chStore, data:DATA.channelShareByYear.Store, backgroundColor:COLORS.muted, stack:'s' },
+        { label:t.chApp, data:DATA.channelShareByYear.App, backgroundColor:COLORS.gold, stack:'s' }
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:16 } },
+        tooltip:{ callbacks:{ label:(ctx)=> ctx.dataset.label+": "+ctx.parsed.y+"%" } } },
+      scales:{ x:{ stacked:true, ticks:baseTicks, grid:{display:false} },
+        y:{ stacked:true, max:100, ticks:{...baseTicks, callback:(v)=>v+"%"}, grid:baseGrid } } }
+  });
+
+  // City ranking
+  const cityLabels = DATA.cities.map(c=> t.cities[c.key]);
+  charts.city = new Chart(document.getElementById('chartCity'), {
+    type:'bar',
+    data:{ labels: cityLabels,
+      datasets:[{ label: t.tShare, data: DATA.cities.map(c=>c.share),
+        backgroundColor: COLORS.greenBright, borderRadius:3, maxBarThickness:22 }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(ctx)=> ctx.parsed.x+"% "+t.tShare } } },
+      scales:{ x:{ ticks:{...baseTicks, callback:(v)=>v+"%"}, grid:baseGrid },
+        y:{ ticks:baseTicks, grid:{display:false} } } }
+  });
+
+  // Category donut
+  const catLabels = DATA.categories.map(c=> t.categories[c.key]);
+  charts.category = new Chart(document.getElementById('chartCategory'), {
+    type:'doughnut',
+    data:{ labels: catLabels,
+      datasets:[{ data: DATA.categories.map(c=>c.share),
+        backgroundColor:[COLORS.greenBright, COLORS.green, COLORS.gold, COLORS.goldSoft, COLORS.muted],
+        borderColor:"#122E27", borderWidth:3 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14 } },
+        tooltip:{ callbacks:{ label:(ctx)=> ctx.label+": "+ctx.parsed+"%" } } } }
+  });
+
+  // New vs returning donut
+  charts.customer = new Chart(document.getElementById('chartCustomer'), {
+    type:'doughnut',
+    data:{ labels: t.newVsReturning,
+      datasets:[{ data: DATA.newVsReturningRevenue,
+        backgroundColor:[COLORS.gold, COLORS.greenBright], borderColor:"#122E27", borderWidth:3 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14 } },
+        tooltip:{ callbacks:{ label:(ctx)=> ctx.label+": "+fmtSAR(ctx.parsed)+" SAR" } } } }
+  });
+
+  // Returns
+  const reasonLabels = DATA.returnReasons.map(r=> t.reasons[r.key]);
+  charts.returns = new Chart(document.getElementById('chartReturns'), {
+    type:'bar',
+    data:{ labels: reasonLabels,
+      datasets:[{ data: DATA.returnReasons.map(r=>r.n), backgroundColor: COLORS.rust, borderRadius:3, maxBarThickness:34 }]},
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{ ticks:baseTicks, grid:baseGrid }, y:{ ticks:baseTicks, grid:{display:false} } } }
+  });
+}
+
+function renderTables(lang){
+  const t = T[lang];
+  const cityBody = document.getElementById('cityTableBody');
+  cityBody.innerHTML = DATA.cities.map(c=>
+    `<tr><td>${t.cities[c.key]}</td><td class="num-cell num">${c.share}%</td><td class="num-cell num"><span class="pill up">+${c.growth}%</span></td></tr>`
+  ).join("");
+
+  const list = document.getElementById('topProductsList');
+  list.innerHTML = t.products.map((p,i)=>
+    `<li><span class="tp-name"><span class="tp-rank">${i+1}</span>${p[0]} <span class="tp-cat">· ${t.categories[p[1]] || p[1]}</span></span><span class="tp-val">${p[2]} SAR</span></li>`
+  ).join("");
+
+  const recs = document.getElementById('recList');
+  recs.innerHTML = t.recs.map((r,i)=>
+    `<li><span class="rec-num">${String(i+1).padStart(2,'0')}</span><span class="rec-text">${r}</span></li>`
+  ).join("");
+}
+
+function applyLang(lang){
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.getElementById('langToggleLabel').textContent = lang === "ar" ? "English" : "العربية";
+
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if (T[lang][key] !== undefined) el.textContent = T[lang][key];
+  });
+
+  renderTables(lang);
+  destroyCharts();
+  buildCharts(lang);
+}
+
+document.getElementById('langToggle').addEventListener('click', ()=>{
+  applyLang(currentLang === "en" ? "ar" : "en");
+});
+
+applyLang("en");
+</script>
+</body>
+</html>
