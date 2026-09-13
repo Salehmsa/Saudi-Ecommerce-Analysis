@@ -675,6 +675,13 @@ function applyLang(lang){
     if (T[lang][key] !== undefined) el.textContent = T[lang][key];
   });
 
+  // Prevent year-range digits (e.g. 2022–2024) from breaking across lines in RTL text
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if (/\d{4}\s*[–-]\s*\d{4}/.test(el.textContent)){
+      el.innerHTML = el.textContent.replace(/(\d{4}\s*[–-]\s*\d{4})/g, '<span style="white-space:nowrap; unicode-bidi:isolate;">$1</span>');
+    }
+  });
+
   renderTables(lang);
   destroyCharts();
   buildCharts(lang);
