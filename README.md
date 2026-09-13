@@ -14,7 +14,7 @@ A full 3-year performance audit for a Saudi e-commerce and retail company spanni
 
 ## 🎛️ Interactive Dashboard
 
-**[Open the live bilingual (Arabic / English) dashboard →](https://salehmsa.github.io/Saudi-Ecommerce-Analysis/)**
+**[Open the live bilingual (Arabic / English) dashboard →](https://salehmsa.github.io/Saudi-Ecommerce-Analysis/docs/index.html)**
 
 A single-page, self-contained HTML dashboard covering all 27 KPIs — revenue trend, channel mix, city ranking, category & product performance, customer behavior, seasonality, and returns — with a language toggle (EN ⇄ AR, full RTL support) and live GitHub link.
 
