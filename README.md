@@ -12,6 +12,14 @@ A full 3-year performance audit for a Saudi e-commerce and retail company spanni
 
 ---
 
+## 🎛️ Interactive Dashboard
+
+**[Open the live bilingual (Arabic / English) dashboard →](https://salehmsa.github.io/Saudi-Ecommerce-Analysis/)**
+
+A single-page, self-contained HTML dashboard covering all 27 KPIs — revenue trend, channel mix, city ranking, category & product performance, customer behavior, seasonality, and returns — with a language toggle (EN ⇄ AR, full RTL support) and live GitHub link.
+
+---
+
 ## Key Findings
 
 | Finding | Detail |
@@ -32,6 +40,8 @@ Saudi-Ecommerce-Analysis/
 ├── data/
 │   ├── noortrade_data.xlsx    # Dataset: Orders, Customers, Products, Returns
 │   └── noortrade_kpi_summary.csv
+├── docs/
+│   └── index.html             # Interactive bilingual (AR/EN) dashboard — GitHub Pages
 └── README.md
 ```
 
